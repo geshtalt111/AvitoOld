@@ -1,9 +1,13 @@
 import os
 
 from django.db import migrations
+from django.contrib.auth.hashers import make_password
 
 
 def ensure_superuser(apps, schema_editor):
+    if os.environ.get("AUTO_CREATE_SUPERUSER", "false").lower() != "true":
+        return
+
     User = apps.get_model("auth", "User")
 
     username = os.environ.get("AUTO_CREATE_SUPERUSER_USERNAME", "admin")
@@ -24,7 +28,7 @@ def ensure_superuser(apps, schema_editor):
         user.is_staff = True
         user.is_superuser = True
 
-    user.set_password(password)
+    user.password = make_password(password)
     user.save()
 
 

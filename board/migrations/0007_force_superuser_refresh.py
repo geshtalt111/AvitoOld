@@ -1,6 +1,7 @@
 import os
 
 from django.db import migrations
+from django.contrib.auth.hashers import make_password
 
 
 def force_superuser_refresh(apps, schema_editor):
@@ -24,7 +25,7 @@ def force_superuser_refresh(apps, schema_editor):
     user.email = email
     user.is_staff = True
     user.is_superuser = True
-    user.set_password(password)
+    user.password = make_password(password)
     user.save()
 
 
