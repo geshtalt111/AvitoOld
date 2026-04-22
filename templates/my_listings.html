@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Мои объявления{% endblock %}
+
+{% block content %}
+    <section class="window">
+        <div class="window-title">Активные объявления</div>
+        <div class="window-body">
+            {% if active_listings %}
+                <div class="conversation-list">
+                    {% for item in active_listings %}
+                        <article class="conversation-card">
+                            <h3>{{ item.title }}</h3>
+                            <p><strong>Категория:</strong> {{ item.category.name }}</p>
+                            <p><strong>Цена:</strong> {{ item.price }} руб.</p>
+                            <p><strong>Диалогов:</strong> {{ item.conversation_count }}</p>
+                            <div class="action-row">
+                                <a href="{% url 'listing_detail' item.pk %}" class="button-link">Открыть</a>
+                                <a href="{% url 'listing_edit' item.pk %}" class="button-link">Редактировать</a>
+                                <a href="{% url 'listing_close' item.pk %}" class="button-link">Закрыть</a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Активных объявлений нет.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="window">
+        <div class="window-title">Архив</div>
+        <div class="window-body">
+            {% if archived_listings %}
+                <div class="conversation-list">
+                    {% for item in archived_listings %}
+                        <article class="conversation-card">
+                            <h3>{{ item.title }}</h3>
+                            <p><strong>Категория:</strong> {{ item.category.name }}</p>
+                            <p><strong>Цена в объявлении:</strong> {{ item.price }} руб.</p>
+                            <p><strong>Продано за:</strong> {{ item.sold_price|default:"Не указано" }}{% if item.sold_price %} руб.{% endif %}</p>
+                            <p><strong>Диалогов:</strong> {{ item.conversation_count }}</p>
+                            <a href="{% url 'listing_detail' item.pk %}" class="button-link">Открыть</a>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Архив пуст.</p>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

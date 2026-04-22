@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <section class="window form-window">
+        <div class="window-title">{{ title }}</div>
+        <div class="window-body">
+            <form method="post" enctype="multipart/form-data" class="win-form">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="form-actions">
+                    <button type="submit">{{ submit_text }}</button>
+                    <a href="{{ cancel_url }}" class="button-link">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </section>
+{% endblock %}

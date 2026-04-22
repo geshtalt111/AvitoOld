@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}{{ listing.title }}{% endblock %}
+
+{% block content %}
+    <section class="window">
+        <div class="window-title">Карточка объявления</div>
+        <div class="window-body">
+            <div class="detail-header">
+                <div>
+                    <h1>{{ listing.title }}</h1>
+                    <p><strong>Категория:</strong> {{ listing.category.name }}</p>
+                    <p><strong>Автор:</strong> {{ listing.author_name }}</p>
+                    <p><strong>Цена в объявлении:</strong> {{ listing.price }} руб.</p>
+                    <p><strong>Создано:</strong> {{ listing.created_at|date:"d.m.Y H:i" }}</p>
+                    {% if listing.sold_price %}
+                        <p><strong>Продано за:</strong> {{ listing.sold_price }} руб.</p>
+                    {% endif %}
+                </div>
+                <div class="status-box">
+                    {% if listing.is_sold %}
+                        <span class="status-label sold">Продано</span>
+                    {% elif not listing.is_active %}
+                        <span class="status-label pending">Скрыто</span>
+                    {% else %}
+                        <span class="status-label active">Активно</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if listing.get_images %}
+                <div class="photo-grid">
+                    {% for image in listing.get_images %}
+                        <div class="photo-card">
+                            <img src="{{ image.url }}" alt="{{ listing.title }}" class="listing-photo">
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="detail-text">
+                {{ listing.description|linebreaks }}
+            </div>
+
+            <div class="action-row">
+                {% if user.is_authenticated and user == listing.author %}
+                    <a href="{% url 'listing_edit' listing.pk %}" class="button-link">Редактировать</a>
+                    <a href="{% url 'listing_delete' listing.pk %}" class="button-link">Удалить</a>
+                    {% if can_close_listing %}
+                        <a href="{% url 'listing_close' listing.pk %}" class="button-link">Закрыть объявление</a>
+                    {% endif %}
+                {% elif user.is_authenticated and user != listing.author and not listing.is_sold and listing.is_active and not existing_conversation %}
+                    <form method="post" action="{% url 'create_deal' listing.pk %}" class="inline-form">
+                        {% csrf_token %}
+                        <button type="submit">Написать продавцу</button>
+                    </form>
+                {% elif user.is_authenticated and existing_conversation %}
+                    <a href="{% url 'deal_chat' existing_conversation.pk %}" class="button-link">Открыть переписку</a>
+                {% elif not user.is_authenticated %}
+                    <p>Чтобы написать продавцу, нужно <a href="{% url 'login' %}">войти</a>.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    {% if user != listing.author %}
+        <section class="window">
+            <div class="window-title">Переписка и продажа</div>
+            <div class="window-body">
+                {% if existing_conversation %}
+                    <p>У вас уже есть диалог с продавцом по этому объявлению.</p>
+                    <a href="{% url 'deal_chat' existing_conversation.pk %}" class="button-link">Перейти в переписку</a>
+                {% else %}
+                    <p>Переписка еще не начата.</p>
+                {% endif %}
+            </div>
+        </section>
+    {% endif %}
+
+    <section class="window">
+        <div class="window-title">Отзывы</div>
+        <div class="window-body">
+            {% if completed_deal and reviews %}
+                <div class="review-list">
+                    {% for review in reviews %}
+                        <article class="review-card">
+                            <p><strong>{{ review.author_name }}</strong> -> {{ review.target_user_name }}</p>
+                            <p><strong>Оценка:</strong> {{ review.rating }}/5</p>
+                            <p>{{ review.text }}</p>
+                            <p class="muted">{{ review.created_at|date:"d.m.Y H:i" }}</p>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% elif completed_deal and can_review %}
+                <a href="{% url 'create_review' completed_deal.pk %}" class="button-link">Оставить отзыв</a>
+            {% elif existing_review %}
+                <p>Вы уже оставили отзыв по этой продаже.</p>
+            {% else %}
+                <p>Отзывов пока нет.</p>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+    <section class="window form-window">
+        <div class="window-title">Вход</div>
+        <div class="window-body">
+            <form method="post" class="win-form">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="form-actions">
+                    <button type="submit">Войти</button>
+                    <a href="{% url 'register' %}" class="button-link">Регистрация</a>
+                </div>
+            </form>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Список объявлений{% endblock %}
+
+{% block content %}
+    <section class="window">
+        <div class="window-title">Поиск и фильтрация</div>
+        <div class="window-body">
+            <form method="get" action="{% url 'listing_list' %}" id="filter-form" data-url="{% url 'listing_list' %}" class="filter-form">
+                <div class="form-row">
+                    <label for="id_q">Поиск по названию</label>
+                    <input type="text" name="q" id="id_q" value="{{ search_query }}" placeholder="Например, велосипед">
+                </div>
+                <div class="form-row">
+                    <label for="id_category">Категория</label>
+                    <select name="category" id="id_category">
+                        <option value="">Все категории</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Найти</button>
+                </div>
+            </form>
+
+            <div id="loading-indicator" class="loading-indicator hidden">Загрузка...</div>
+        </div>
+    </section>
+
+    <section class="window">
+        <div class="window-title">Объявления</div>
+        <div class="window-body" id="listing-results">
+            {% include "includes/listing_cards.html" %}
+        </div>
+    </section>
+{% endblock %}

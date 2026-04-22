@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Переписка{% endblock %}
+
+{% block content %}
+    <section class="chat-layout">
+        <aside class="window chat-sidebar">
+            <div class="window-title">Диалоги</div>
+            <div class="window-body chat-sidebar-body">
+                {% if sidebar_conversations %}
+                    <div class="sidebar-list">
+                        {% for item in sidebar_conversations %}
+                            <a href="{% url 'deal_chat' item.pk %}" class="sidebar-link {% if item.pk == deal.pk %}sidebar-link-active{% endif %}">
+                                <span class="sidebar-link-title">
+                                    {% if user == item.seller %}
+                                        {{ item.buyer_name }}
+                                    {% else %}
+                                        {{ item.seller_name }}
+                                    {% endif %}
+                                </span>
+                                <span class="sidebar-link-subtitle">{{ item.listing.title }}</span>
+                                <span class="sidebar-link-meta">
+                                    <span>{{ item.message_count }} сообщений</span>
+                                    <span>{{ item.last_message_time|default:item.created_at|date:"d.m.Y H:i" }}</span>
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>Диалогов пока нет.</p>
+                {% endif %}
+            </div>
+        </aside>
+
+        <div class="chat-main">
+            <section class="window chat-header-window">
+                <div class="window-title">Текущий диалог</div>
+                <div class="window-body chat-header-body">
+                    <div class="chat-dialog-meta">
+                        <div class="chat-dialog-main">
+                            <h2 class="chat-dialog-title">{{ deal.listing.title }}</h2>
+                            <p class="chat-dialog-line">
+                                <strong>Собеседник:</strong>
+                                {% if user == deal.seller %}
+                                    {{ deal.buyer_name }}
+                                {% else %}
+                                    {{ deal.seller_name }}
+                                {% endif %}
+                            </p>
+                            <p class="chat-dialog-line"><strong>Покупатель:</strong> {{ deal.buyer_name }}</p>
+                            <p class="chat-dialog-line"><strong>Продавец:</strong> {{ deal.seller_name }}</p>
+                        </div>
+                        <div class="chat-dialog-side">
+                            <span class="chat-status-pill">{{ deal.status_text }}</span>
+                            {% if deal.listing.sold_price %}
+                                <p class="chat-dialog-line"><strong>Продано за:</strong> {{ deal.listing.sold_price }} руб.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="action-row chat-header-actions">
+                        <a href="{% url 'listing_detail' deal.listing.pk %}" class="button-link">Открыть объявление</a>
+                        {% if can_close_listing %}
+                            <a href="{% url 'listing_close' deal.listing.pk %}" class="button-link">Закрыть объявление</a>
+                        {% endif %}
+                        {% if can_review %}
+                            <a href="{% url 'create_review' deal.pk %}" class="button-link">Оставить отзыв</a>
+                        {% endif %}
+                    </div>
+
+                    {% if existing_review %}
+                        <p class="chat-inline-note">Вы уже оставили отзыв по этой продаже.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="window chat-thread-window">
+                <div class="window-title">Личные сообщения</div>
+                <div class="window-body chat-thread-shell">
+                    <div class="chat-thread-body">
+                        {% if chat_messages %}
+                            <div class="chat-list">
+                                {% for item in chat_messages %}
+                                    <article class="chat-message {% if item.author == user %}chat-own{% else %}chat-other{% endif %}">
+                                        <p class="chat-message-author"><strong>{{ item.author_name }}</strong></p>
+                                        <p class="chat-message-text">{{ item.text|linebreaksbr }}</p>
+                                        <p class="muted chat-message-time">{{ item.created_at|date:"d.m.Y H:i" }}</p>
+                                    </article>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p>Сообщений пока нет.</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="chat-compose-panel">
+                        {% if can_write_messages %}
+                            <form method="post" class="win-form chat-compose-form">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                <div class="form-actions">
+                                    <button type="submit">Отправить</button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <p class="chat-inline-note">Объявление уже закрыто. История сообщений доступна только для чтения.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+{% endblock %}

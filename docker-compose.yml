@@ -1,0 +1,17 @@
+services:
+  web:
+    build: .
+    container_name: market_board_web
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      DJANGO_ALLOWED_HOSTS: 127.0.0.1,localhost
+      SQLITE_PATH: /app/persist/db.sqlite3
+      MEDIA_ROOT: /app/persist/media
+    volumes:
+      - app_data:/app/persist
+
+volumes:
+  app_data:

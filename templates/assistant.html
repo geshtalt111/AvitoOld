@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}AI-помощник{% endblock %}
+
+{% block extra_head %}
+    <script src="{% static 'js/assistant.js' %}?v=20260421c" defer></script>
+{% endblock %}
+
+{% block content %}
+    <section class="window assistant-window">
+        <div class="window-title">AI-помощник</div>
+        <div class="window-body">
+            <div class="assistant-hero">
+                <div>
+                    <h2>Задайте любой вопрос и получите быстрый ответ</h2>
+                    <p class="assistant-hero-text">
+                        Помощник отвечает на обычные вопросы в свободной форме: объяснения, идеи,
+                        советы, короткие разборы и помощь по повседневным задачам.
+                    </p>
+                </div>
+                {% if assistant_status_visible %}
+                    <div class="assistant-status-panel">
+                        <span class="assistant-status-badge {% if assistant_available %}assistant-status-ready{% else %}assistant-status-offline{% endif %}">
+                            {% if assistant_available %}API подключен{% else %}API не настроен{% endif %}
+                        </span>
+                        <p class="muted">Текущая модель: {{ assistant_model }}</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="assistant-layout">
+                <div class="assistant-chat-panel">
+                    <div
+                        class="assistant-history"
+                        id="assistant-history"
+                        data-welcome="Привет! Я универсальный AI-помощник. Можете задать любой вопрос."
+                    >
+                        {% if assistant_messages %}
+                            {% for item in assistant_messages %}
+                                <article class="assistant-bubble assistant-bubble-{{ item.role }}">
+                                    <div class="assistant-bubble-role">
+                                        {% if item.role == "user" %}Вы{% else %}Помощник{% endif %}
+                                    </div>
+                                    <div class="assistant-bubble-text">{{ item.content|linebreaksbr }}</div>
+                                </article>
+                            {% endfor %}
+                        {% else %}
+                            <article class="assistant-bubble assistant-bubble-assistant assistant-bubble-welcome">
+                                <div class="assistant-bubble-role">Помощник</div>
+                                <div class="assistant-bubble-text">
+                                    Привет! Я универсальный AI-помощник. Можете задать любой вопрос.
+                                </div>
+                            </article>
+                        {% endif %}
+                    </div>
+
+                    <form
+                        method="post"
+                        action="{% url 'assistant_page' %}"
+                        id="assistant-form"
+                        class="assistant-form"
+                        data-clear-url="{% url 'assistant_clear' %}"
+                    >
+                        {% csrf_token %}
+                        {{ assistant_form.message }}
+                        <div class="assistant-form-actions">
+                            <button type="submit" {% if not assistant_available %}disabled{% endif %}>Спросить</button>
+                            <button type="button" id="assistant-clear" {% if not assistant_messages %}disabled{% endif %}>Очистить чат</button>
+                        </div>
+                        <p class="muted assistant-form-note" id="assistant-feedback">
+                            {% if assistant_available %}
+                                Можно спрашивать про что угодно.
+                            {% else %}
+                                Сначала настройте ключ AI API, и помощник начнет отвечать.
+                            {% endif %}
+                        </p>
+                    </form>
+                </div>
+
+                <aside class="assistant-side-panel">
+                    <div class="assistant-side-card">
+                        <h3>Для чего подходит</h3>
+                        <ul class="assistant-info-list">
+                            <li>быстрых ответов на любые вопросы</li>
+                            <li>объяснения тем простыми словами</li>
+                            <li>идей, черновиков и кратких разборов</li>
+                            <li>помощи по учебе, работе и повседневным задачам</li>
+                        </ul>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+{% endblock %}

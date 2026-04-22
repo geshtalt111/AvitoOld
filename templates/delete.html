@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Удаление объявления{% endblock %}
+
+{% block content %}
+    <section class="window form-window">
+        <div class="window-title">Удаление объявления</div>
+        <div class="window-body">
+            <p>Вы уверены, что хотите удалить объявление <strong>{{ listing.title }}</strong>?</p>
+            <form method="post" class="win-form">
+                {% csrf_token %}
+                <div class="form-actions">
+                    <button type="submit">Да, удалить</button>
+                    <a href="{{ cancel_url }}" class="button-link">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+    <section class="window profile-window">
+        <div class="window-title">Профиль</div>
+        <div class="window-body">
+            <div class="profile-layout">
+                <div class="profile-preview">
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="Аватар" class="avatar-image">
+                    {% else %}
+                        <div class="avatar-placeholder">Нет аватара</div>
+                    {% endif %}
+                    <p><strong>Логин для входа:</strong> {{ user.username }}</p>
+                    <p><strong>Ник:</strong> {{ profile.display_name|default:"Не указан" }}</p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" class="win-form profile-form">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="form-actions">
+                        <button type="submit">Сохранить профиль</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}

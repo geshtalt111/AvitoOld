@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Сообщения{% endblock %}
+
+{% block content %}
+    <section class="window inbox-window">
+        <div class="window-title">Сообщения</div>
+        <div class="window-body inbox-window-body">
+            {% if conversations %}
+                <div class="conversation-list inbox-list">
+                    {% for item in conversations %}
+                        <article class="conversation-card inbox-card">
+                            <div class="inbox-card-main">
+                                <div class="inbox-card-head">
+                                    <h3>{{ item.listing.title }}</h3>
+                                    <span class="conversation-status">{{ item.status_text }}</span>
+                                </div>
+                                <p class="inbox-card-meta">
+                                    <strong>Собеседник:</strong>
+                                    {% if user == item.seller %}
+                                        {{ item.buyer_name }}
+                                    {% else %}
+                                        {{ item.seller_name }}
+                                    {% endif %}
+                                </p>
+                                <p class="muted inbox-card-meta">
+                                    Последняя активность:
+                                    {{ item.last_message_time|default:item.created_at|date:"d.m.Y H:i" }}
+                                </p>
+                            </div>
+                            <div class="inbox-card-stats">
+                                <span class="inbox-card-count">{{ item.message_count }}</span>
+                                <span class="muted">сообщений</span>
+                            </div>
+                            <div class="action-row inbox-card-actions">
+                                <a href="{% url 'deal_chat' item.pk %}" class="button-link">Открыть чат</a>
+                                <a href="{% url 'listing_detail' item.listing.pk %}" class="button-link">Открыть объявление</a>
+                                {% if item.is_completed and item.id not in reviewed_deal_ids %}
+                                    <a href="{% url 'create_review' item.pk %}" class="button-link">Оставить отзыв</a>
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>У вас пока нет сообщений.</p>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

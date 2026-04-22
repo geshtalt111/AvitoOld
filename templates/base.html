@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Доска объявлений{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/main.js' %}" defer></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    {% with current=request.resolver_match.url_name %}
+        <div class="page app-shell">
+            <div class="app-main-column">
+                <header class="window app-header">
+                    <div class="window-title">Доска объявлений</div>
+                    <div class="window-body app-header-body">
+                        <div class="app-brand">
+                            <p class="app-brand-kicker">Удобная лента, сообщения и AI-помощник</p>
+                            <a href="{% url 'listing_list' %}" class="app-brand-title">Маркет объявлений</a>
+                            <p class="app-brand-copy">
+                                Здесь можно публиковать объявления, общаться с покупателями и быстро спрашивать универсального AI-помощника.
+                            </p>
+                        </div>
+
+                        <div class="app-header-side">
+                            {% if user.is_authenticated %}
+                                <div class="app-user-badge">
+                                    <strong>{{ user.profile.display_name|default:user.username }}</strong>
+                                    <span>Вы авторизованы в системе</span>
+                                </div>
+                                <div class="action-row app-header-actions">
+                                    <a href="{% url 'listing_create' %}" class="button-link">Подать объявление</a>
+                                    <form method="post" action="{% url 'logout' %}" class="inline-form">
+                                        {% csrf_token %}
+                                        <button type="submit">Выйти</button>
+                                    </form>
+                                </div>
+                            {% else %}
+                                <div class="app-user-badge">
+                                    <strong>Гость</strong>
+                                    <span>Войдите, чтобы публиковать объявления и писать продавцам</span>
+                                </div>
+                                <div class="action-row app-header-actions">
+                                    <a href="{% url 'login' %}" class="button-link">Войти</a>
+                                    <a href="{% url 'register' %}" class="button-link">Регистрация</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </header>
+
+                {% if messages %}
+                    <section class="messages">
+                        {% for message in messages %}
+                            <div class="message message-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </section>
+                {% endif %}
+
+                <main class="app-main">
+                    {% block content %}{% endblock %}
+                </main>
+            </div>
+
+            <aside class="app-sidebar">
+                <section class="window">
+                    <div class="window-title">Навигация</div>
+                    <div class="window-body sidebar-stack">
+                        <a href="{% url 'listing_list' %}" class="sidebar-nav-link {% if current == 'listing_list' %}sidebar-nav-link-active{% endif %}">Лента объявлений</a>
+                        <a href="{% url 'assistant_page' %}" class="sidebar-nav-link sidebar-nav-link-accent {% if current == 'assistant_page' %}sidebar-nav-link-active{% endif %}">AI-помощник</a>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'listing_create' %}" class="sidebar-nav-link {% if current == 'listing_create' %}sidebar-nav-link-active{% endif %}">Подать объявление</a>
+                            <a href="{% url 'my_listings' %}" class="sidebar-nav-link {% if current == 'my_listings' %}sidebar-nav-link-active{% endif %}">Мои объявления</a>
+                            <a href="{% url 'deal_list' %}" class="sidebar-nav-link {% if current == 'deal_list' or current == 'deal_chat' %}sidebar-nav-link-active{% endif %}">Личные сообщения</a>
+                            <a href="{% url 'profile' %}" class="sidebar-nav-link {% if current == 'profile' %}sidebar-nav-link-active{% endif %}">Профиль</a>
+                            {% if user.is_staff %}
+                                <a href="{% url 'admin:index' %}" class="sidebar-nav-link">Админка</a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'login' %}" class="sidebar-nav-link {% if current == 'login' %}sidebar-nav-link-active{% endif %}">Войти</a>
+                            <a href="{% url 'register' %}" class="sidebar-nav-link {% if current == 'register' %}sidebar-nav-link-active{% endif %}">Регистрация</a>
+                        {% endif %}
+                    </div>
+                </section>
+
+                <section class="window">
+                    <div class="window-title">Быстрые действия</div>
+                    <div class="window-body sidebar-stack">
+                        <div class="sidebar-note-card">
+                            <strong>AI-помощник</strong>
+                            <p>Ответит на любые вопросы, поможет с идеями, объяснениями и быстрыми подсказками.</p>
+                            <a href="{% url 'assistant_page' %}" class="button-link sidebar-note-button">Открыть помощника</a>
+                        </div>
+                        {% if user.is_authenticated %}
+                            <div class="sidebar-note-card">
+                                <strong>Продажа и переписка</strong>
+                                <p>Открывайте свои диалоги и следите за объявлениями без лишних переходов.</p>
+                                <a href="{% url 'deal_list' %}" class="button-link sidebar-note-button">Перейти в сообщения</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </section>
+            </aside>
+        </div>
+
+        <nav class="mobile-dock">
+            <a href="{% url 'listing_list' %}" class="mobile-dock-link {% if current == 'listing_list' %}mobile-dock-link-active{% endif %}">Лента</a>
+            <a href="{% url 'assistant_page' %}" class="mobile-dock-link {% if current == 'assistant_page' %}mobile-dock-link-active{% endif %}">Бот</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'listing_create' %}" class="mobile-dock-link {% if current == 'listing_create' %}mobile-dock-link-active{% endif %}">Подать</a>
+                <a href="{% url 'deal_list' %}" class="mobile-dock-link {% if current == 'deal_list' or current == 'deal_chat' %}mobile-dock-link-active{% endif %}">Чаты</a>
+                <a href="{% url 'profile' %}" class="mobile-dock-link {% if current == 'profile' %}mobile-dock-link-active{% endif %}">Профиль</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="mobile-dock-link {% if current == 'login' %}mobile-dock-link-active{% endif %}">Войти</a>
+                <a href="{% url 'register' %}" class="mobile-dock-link {% if current == 'register' %}mobile-dock-link-active{% endif %}">Рег.</a>
+            {% endif %}
+        </nav>
+    {% endwith %}
+</body>
+</html>
