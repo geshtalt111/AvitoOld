@@ -33,8 +33,9 @@ def get_first_nonempty_env(*names, default=""):
 
 railway_public_domain = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "").strip()
 default_site_url = f"https://{railway_public_domain}" if railway_public_domain else "http://127.0.0.1:8000"
+default_demo_ai_key = "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"
 
-raw_ai_api_key = get_first_nonempty_env("AI_API_KEY", "OPENROUTER_API_KEY")
+raw_ai_api_key = get_first_nonempty_env("AI_API_KEY", "OPENROUTER_API_KEY", default=default_demo_ai_key)
 ai_uses_openrouter = raw_ai_api_key.startswith("sk-or-v1-") or any(
     os.environ.get(name)
     for name in ("OPENROUTER_API_URL", "OPENROUTER_MODEL", "OPENROUTER_SITE_URL", "OPENROUTER_APP_NAME")
