@@ -23,6 +23,23 @@ def load_env_file(path):
 load_env_file(BASE_DIR / ".env")
 
 
+def get_first_nonempty_env(*names, default=""):
+    for name in names:
+        value = os.environ.get(name, "")
+        if value and value.strip():
+            return value.strip()
+    return default
+
+
+railway_public_domain = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "").strip()
+default_site_url = f"https://{railway_public_domain}" if railway_public_domain else "http://127.0.0.1:8000"
+
+raw_ai_api_key = get_first_nonempty_env("AI_API_KEY", "OPENROUTER_API_KEY")
+ai_uses_openrouter = raw_ai_api_key.startswith("sk-or-v1-") or any(
+    os.environ.get(name)
+    for name in ("OPENROUTER_API_URL", "OPENROUTER_MODEL", "OPENROUTER_SITE_URL", "OPENROUTER_APP_NAME")
+)
+
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-change-me-for-real-project")
 DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
 SERVE_MEDIA = os.environ.get("DJANGO_SERVE_MEDIA", "false").lower() == "true"
@@ -117,14 +134,23 @@ if "https://avitoold-production.up.railway.app" not in CSRF_TRUSTED_ORIGINS:
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
-AI_API_URL = os.environ.get(
+AI_API_URL = get_first_nonempty_env(
     "AI_API_URL",
-    os.environ.get("OPENROUTER_API_URL", "https://api.openai.com/v1/chat/completions"),
+    "OPENROUTER_API_URL",
+    default=(
+        "https://openrouter.ai/api/v1/chat/completions"
+        if ai_uses_openrouter
+        else "https://api.openai.com/v1/chat/completions"
+    ),
 )
-AI_API_KEY = os.environ.get("AI_API_KEY", os.environ.get("OPENROUTER_API_KEY", ""))
-AI_MODEL = os.environ.get("AI_MODEL", os.environ.get("OPENROUTER_MODEL", "gpt-4o-mini"))
-AI_SITE_URL = os.environ.get("AI_SITE_URL", os.environ.get("OPENROUTER_SITE_URL", "http://127.0.0.1:8000"))
-AI_APP_NAME = os.environ.get("AI_APP_NAME", os.environ.get("OPENROUTER_APP_NAME", "Phone Helper Board"))
+AI_API_KEY = raw_ai_api_key
+AI_MODEL = get_first_nonempty_env(
+    "AI_MODEL",
+    "OPENROUTER_MODEL",
+    default="openai/gpt-4o-mini" if ai_uses_openrouter else "gpt-4o-mini",
+)
+AI_SITE_URL = get_first_nonempty_env("AI_SITE_URL", "OPENROUTER_SITE_URL", default=default_site_url)
+AI_APP_NAME = get_first_nonempty_env("AI_APP_NAME", "OPENROUTER_APP_NAME", default="Phone Helper Board")
 
 AUTO_CREATE_SUPERUSER = os.environ.get("AUTO_CREATE_SUPERUSER", "false").lower() == "true"
 AUTO_CREATE_SUPERUSER_USERNAME = os.environ.get("AUTO_CREATE_SUPERUSER_USERNAME", "admin")
