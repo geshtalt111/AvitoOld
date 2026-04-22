@@ -125,3 +125,8 @@ AI_API_KEY = os.environ.get("AI_API_KEY", os.environ.get("OPENROUTER_API_KEY", "
 AI_MODEL = os.environ.get("AI_MODEL", os.environ.get("OPENROUTER_MODEL", "gpt-4o-mini"))
 AI_SITE_URL = os.environ.get("AI_SITE_URL", os.environ.get("OPENROUTER_SITE_URL", "http://127.0.0.1:8000"))
 AI_APP_NAME = os.environ.get("AI_APP_NAME", os.environ.get("OPENROUTER_APP_NAME", "Phone Helper Board"))
+
+AUTO_CREATE_SUPERUSER = os.environ.get("AUTO_CREATE_SUPERUSER", "false").lower() == "true"
+AUTO_CREATE_SUPERUSER_USERNAME = os.environ.get("AUTO_CREATE_SUPERUSER_USERNAME", "admin")
+AUTO_CREATE_SUPERUSER_EMAIL = os.environ.get("AUTO_CREATE_SUPERUSER_EMAIL", "admin@example.com")
+AUTO_CREATE_SUPERUSER_PASSWORD = os.environ.get("AUTO_CREATE_SUPERUSER_PASSWORD", "admin123456")
