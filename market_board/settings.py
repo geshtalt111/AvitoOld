@@ -26,9 +26,19 @@ load_env_file(BASE_DIR / ".env")
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-change-me-for-real-project")
 DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
 SERVE_MEDIA = os.environ.get("DJANGO_SERVE_MEDIA", "false").lower() == "true"
-default_hosts = "127.0.0.1,localhost,testserver"
-allowed_hosts_value = os.environ.get("DJANGO_ALLOWED_HOSTS", default_hosts)
+
+allowed_hosts_value = os.environ.get("DJANGO_ALLOWED_HOSTS", "*")
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_value.split(",") if host.strip()]
+if not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ["*"]
+if "*" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append("*")
+
+csrf_trusted_origins_value = os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "")
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in csrf_trusted_origins_value.split(",") if origin.strip()
+]
+
 
 
 INSTALLED_APPS = [
@@ -106,6 +116,10 @@ csrf_trusted_origins_value = os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "")
 CSRF_TRUSTED_ORIGINS = [
     origin.strip() for origin in csrf_trusted_origins_value.split(",") if origin.strip()
 ]
+if railway_public_domain:
+    railway_public_origin = f"https://{railway_public_domain}"
+    if railway_public_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(railway_public_origin)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
